@@ -71,8 +71,6 @@
                                             <action selector="showAlbum:" destination="BYZ-38-t0r" id="itk-kR-hzo"/>
                                         </connections>
                                     </barButtonItem>
-                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="x5d-DL-ZGo"/>
-                                    <barButtonItem title="Font" id="Azg-NL-g26"/>
                                 </items>
                             </toolbar>
                         </subviews>
