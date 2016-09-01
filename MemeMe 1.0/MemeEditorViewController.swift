@@ -22,31 +22,26 @@ class MemeEditorViewController: UIViewController, UIImagePickerControllerDelegat
 		case Bottom = "BOTTOM"
 	}
 	
-	struct Meme {
-		let topText: String
-		let bottomText: String
-		let originalImage : UIImage
-		let memedImage : UIImage
-	}
-	
     override func viewDidLoad() {
         super.viewDidLoad()
-		
-		// Check to see if our device has a camera. If it does not support one, disable our camera button
-		if !UIImagePickerController.isSourceTypeAvailable(.Camera){
-			cameraButton.enabled = false
-		}
 		
 		// Register our UIImageView for taps so we can dismiss the keyboard in a more intuitive fashion
 		let imageTap = UITapGestureRecognizer(target: self, action: #selector(MemeEditorViewController.dismissKeyboard))
 		previewImageView.addGestureRecognizer(imageTap)
 		previewImageView.userInteractionEnabled = true
 		
-		setupTextFields()
+		setupTextField(textFieldTop)
+		setupTextField(textFieldBottom)
     }
 	
 	override func viewWillAppear(animated: Bool) {
 		super.viewWillAppear(animated)
+		
+		// Check to see if our device has a camera. If it does not support one, disable our camera button
+		if !UIImagePickerController.isSourceTypeAvailable(.Camera){
+			cameraButton.enabled = false
+		}
+		
 		subscribeToKeyboardNotifications()
 	}
 	
@@ -55,7 +50,7 @@ class MemeEditorViewController: UIViewController, UIImagePickerControllerDelegat
 		unsubscribeFromKeyboardNotifications()
 	}
 	
-	func setupTextFields() {
+	func setupTextField(textfield : UITextField) {
 		let style = NSMutableParagraphStyle()
 		style.alignment = .Center
 		
@@ -67,25 +62,23 @@ class MemeEditorViewController: UIViewController, UIImagePickerControllerDelegat
 			NSParagraphStyleAttributeName : style
 		]
 		
-		textFieldTop.defaultTextAttributes = memeTextAttributes
-		textFieldBottom.defaultTextAttributes = memeTextAttributes
-		textFieldTop.autocorrectionType = UITextAutocorrectionType.No
-		textFieldBottom.autocorrectionType = UITextAutocorrectionType.No
+		textfield.defaultTextAttributes = memeTextAttributes
+		textfield.autocorrectionType = UITextAutocorrectionType.No
 	}
 
     // MARK: - User Actions
 	@IBAction func showCamera(sender: AnyObject) {
-		let imagePicker = UIImagePickerController()
-		imagePicker.delegate = self
-		imagePicker.sourceType = .Camera
-		imagePicker.allowsEditing = true
-		presentViewController(imagePicker, animated: true, completion: nil)
+		pickImageFromSource(.Camera)
 	}
 	
 	@IBAction func showAlbum(sender: AnyObject) {
+		pickImageFromSource(.PhotoLibrary)
+	}
+	
+	func pickImageFromSource(source: UIImagePickerControllerSourceType){
 		let imagePicker = UIImagePickerController()
 		imagePicker.delegate = self
-		imagePicker.sourceType = .PhotoLibrary
+		imagePicker.sourceType = source
 		imagePicker.allowsEditing = true
 		presentViewController(imagePicker, animated: true, completion: nil)
 	}
@@ -123,7 +116,7 @@ class MemeEditorViewController: UIViewController, UIImagePickerControllerDelegat
 	}
 	
 	// MARK: - Images and Saving
-	func makeMeme() -> Meme{
+	func makeMeme() -> Meme {
 		let memedImage : UIImage = generateMemedImage()
 		let meme = Meme(topText: textFieldTop.text!, bottomText:textFieldBottom.text!, originalImage: previewImageView.image!, memedImage: memedImage)
 		return meme
@@ -194,7 +187,9 @@ class MemeEditorViewController: UIViewController, UIImagePickerControllerDelegat
 	
 	func keyboardWillShow(notification: NSNotification) {
 		if textFieldBottom.isFirstResponder(){
-			view.frame.origin.y -= getKeyboardHeight(notification)
+			view.frame.origin.y = getKeyboardHeight(notification) * (-1)
+		} else if textFieldTop.isFirstResponder(){
+			self.view.frame.origin.y = 0;
 		}
 	}
 	
